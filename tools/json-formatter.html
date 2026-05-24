@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON 格式化 - 工具盒 ToolKitHub</title>
+  <meta name="description" content="在线 JSON 格式化工具，支持 JSON 格式化、压缩、校验，树形展示，语法高亮。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../" class="logo">🧰 工具盒 <span class="logo-sub">ToolKitHub</span></a>
+    </div>
+  </header>
+  <main class="container tool-page">
+    <a href="../" class="back-link">← 返回首页</a>
+    <div class="tool-box">
+      <h1>📋 JSON 格式化</h1>
+      <p class="tool-desc">格式化、压缩、校验 JSON 数据，支持语法高亮和错误提示</p>
+      <div class="tool-area">
+        <div>
+          <label class="tool-label" for="json-input">输入 JSON</label>
+          <textarea id="json-input" class="tool-input" placeholder='{"name": "工具盒", "version": 1, "tools": ["JSON", "Base64", "Diff"]}'></textarea>
+        </div>
+        <div class="tool-actions">
+          <button onclick="formatJSON()" class="btn btn-primary">✨ 格式化</button>
+          <button onclick="compressJSON()" class="btn btn-secondary">🗜️ 压缩</button>
+          <button onclick="clearJSON()" class="btn btn-secondary">🗑️ 清空</button>
+          <span class="json-status" id="json-status"></span>
+        </div>
+        <div class="error-msg" id="json-error"></div>
+        <div>
+          <label class="tool-label">输出结果</label>
+          <div class="tool-output" id="json-output">{ }</div>
+          <button class="copy-btn" onclick="copyJSON()">📋 复制</button>
+        </div>
+      </div>
+    </div>
+    <!-- 广告位 -->
+    <div class="ad-placeholder">
+      <p class="ad-label">—— 推广 ——</p>
+      <div class="ad-content">发现更多开发者工具？<a href="https://www.baidu.com/s?wd=%E5%9C%A8%E7%BA%BFJSON%E5%B7%A5%E5%85%B7" target="_blank">在线 JSON 工具合集</a></div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container"><p>🧰 工具盒 ToolKitHub · 免费在线工具集</p></div>
+  </footer>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    const input = document.getElementById('json-input');
+    const output = document.getElementById('json-output');
+    const status = document.getElementById('json-status');
+    const errEl = document.getElementById('json-error');
+
+    function formatJSON() {
+      hideError('json-error');
+      try {
+        const parsed = JSON.parse(input.value);
+        output.textContent = JSON.stringify(parsed, null, 2);
+        status.textContent = '✅ 有效 JSON';
+        status.style.color = '#16a34a';
+      } catch(e) {
+        showError('json-error', 'JSON 格式错误：' + e.message);
+        status.textContent = '❌ 无效 JSON';
+        status.style.color = '#dc2626';
+      }
+    }
+    function compressJSON() {
+      hideError('json-error');
+      try {
+        const parsed = JSON.parse(input.value);
+        output.textContent = JSON.stringify(parsed);
+        status.textContent = '✅ 已压缩';
+        status.style.color = '#16a34a';
+      } catch(e) {
+        showError('json-error', 'JSON 格式错误：' + e.message);
+      }
+    }
+    function clearJSON() {
+      input.value = '';
+      output.textContent = '{ }';
+      status.textContent = '';
+      hideError('json-error');
+    }
+    function copyJSON() { copyText(this, output.textContent); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时间戳转换 - 工具盒 ToolKitHub</title>
+  <meta name="description" content="在线 Unix 时间戳转换工具，时间戳与日期时间互转，支持毫秒精度，实时转换。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container"><a href="../" class="logo">🧰 工具盒 <span class="logo-sub">ToolKitHub</span></a></div>
+  </header>
+  <main class="container tool-page">
+    <a href="../" class="back-link">← 返回首页</a>
+    <div class="tool-box">
+      <h1>⏰ 时间戳转换</h1>
+      <p class="tool-desc">Unix 时间戳与可读日期时间互转，支持秒/毫秒</p>
+      <div class="tool-area">
+        <div>
+          <label class="tool-label">📅 当前时间</label>
+          <div class="tool-output" id="ts-now" style="min-height:auto;padding:10px 14px;font-size:14px;font-family:inherit">加载中...</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <label class="tool-label" for="ts-input">时间戳 → 日期</label>
+            <input id="ts-input" class="tool-input" type="number" placeholder="例如：1716480000" style="font-size:14px;padding:10px 14px;min-height:auto">
+            <div class="tool-actions" style="margin-top:8px">
+              <button onclick="tsToDate()" class="btn btn-primary btn-sm">→ 转日期</button>
+              <button onclick="useNow()" class="btn btn-secondary btn-sm">当前时间戳</button>
+            </div>
+            <div class="tool-output" id="ts-result" style="min-height:40px;margin-top:8px;font-size:14px;font-family:inherit">等待输入...</div>
+          </div>
+          <div>
+            <label class="tool-label" for="ts-date">日期 → 时间戳</label>
+            <input id="ts-date" class="tool-input" type="datetime-local" style="min-height:auto;font-size:14px;padding:10px 14px">
+            <div class="tool-actions" style="margin-top:8px">
+              <button onclick="dateToTs()" class="btn btn-primary btn-sm">→ 转时间戳</button>
+            </div>
+            <div class="tool-output" id="ts-result2" style="min-height:40px;margin-top:8px;font-size:14px;font-family:inherit">等待输入...</div>
+          </div>
+        </div>
+        <div class="error-msg" id="ts-error"></div>
+      </div>
+    </div>
+    <div class="ad-placeholder">
+      <p class="ad-label">—— 推广 ——</p>
+      <div class="ad-content">推荐资源：<a href="https://www.baidu.com/s?wd=%E5%9C%A8%E7%BA%BF%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E6%8D%A2" target="_blank">在线时间戳工具</a></div>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="container"><p>🧰 工具盒 ToolKitHub · 免费在线工具集</p></div></footer>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    const nowEl = document.getElementById('ts-now');
+    const tsInput = document.getElementById('ts-input');
+    const tsDate = document.getElementById('ts-date');
+    const result1 = document.getElementById('ts-result');
+    const result2 = document.getElementById('ts-result2');
+    
+    function updateNow() {
+      const d = new Date();
+      nowEl.innerHTML = `Unix 秒: <strong>${Math.floor(d.getTime()/1000)}</strong> | 毫秒: <strong>${d.getTime()}</strong> | 本地时间: <strong>${d.toLocaleString()}</strong>`;
+    }
+    updateNow();
+    setInterval(updateNow, 1000);
+
+    function tsToDate() {
+      hideError('ts-error');
+      const val = parseInt(tsInput.value);
+      if (isNaN(val)) { showError('ts-error', '请输入有效数字'); return; }
+      // 自动判断秒/毫秒
+      const d = val > 1e12 ? new Date(val) : new Date(val * 1000);
+      result1.innerHTML = `
+        本地时间: <strong>${d.toLocaleString()}</strong><br>
+        UTC 时间: <strong>${d.toUTCString()}</strong><br>
+        ISO 格式: <strong>${d.toISOString()}</strong>
+      `;
+    }
+    function useNow() { tsInput.value = Math.floor(Date.now()/1000); tsToDate(); }
+    function dateToTs() {
+      hideError('ts-error');
+      if (!tsDate.value) { showError('ts-error', '请选择日期时间'); return; }
+      const d = new Date(tsDate.value);
+      result2.innerHTML = `Unix 秒: <strong>${Math.floor(d.getTime()/1000)}</strong><br>Unix 毫秒: <strong>${d.getTime()}</strong>`;
+    }
+  </script>
+</body>
+</html>

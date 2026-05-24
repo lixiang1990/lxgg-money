@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 编解码 - 工具盒 ToolKitHub</title>
+  <meta name="description" content="在线 Base64 编码解码工具，支持文本 Base64 编码、解码，支持 UTF-8 中文。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container"><a href="../" class="logo">🧰 工具盒 <span class="logo-sub">ToolKitHub</span></a></div>
+  </header>
+  <main class="container tool-page">
+    <a href="../" class="back-link">← 返回首页</a>
+    <div class="tool-box">
+      <h1>🔐 Base64 编解码</h1>
+      <p class="tool-desc">Base64 编码/解码，支持中文 UTF-8</p>
+      <div class="tool-area">
+        <div>
+          <label class="tool-label" for="b64-input">输入文本</label>
+          <textarea id="b64-input" class="tool-input" placeholder="输入要编码或解码的文本..."></textarea>
+        </div>
+        <div class="tool-actions">
+          <button onclick="encodeB64()" class="btn btn-primary">🔒 编码</button>
+          <button onclick="decodeB64()" class="btn btn-secondary">🔓 解码</button>
+          <button onclick="clearB64()" class="btn btn-secondary">🗑️ 清空</button>
+        </div>
+        <div class="error-msg" id="b64-error"></div>
+        <div>
+          <label class="tool-label">输出结果</label>
+          <div class="tool-output" id="b64-output">等待输入...</div>
+          <button class="copy-btn" onclick="copyB64()">📋 复制</button>
+        </div>
+      </div>
+    </div>
+    <div class="ad-placeholder">
+      <p class="ad-label">—— 推广 ——</p>
+      <div class="ad-content">推荐开发者工具：<a href="https://www.baidu.com/s?wd=%E5%9C%A8%E7%BA%BF%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7%E9%9B%86" target="_blank">在线开发者工具</a></div>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="container"><p>🧰 工具盒 ToolKitHub · 免费在线工具集</p></div></footer>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    const input = document.getElementById('b64-input');
+    const output = document.getElementById('b64-output');
+
+    function encodeB64() {
+      hideError('b64-error');
+      try {
+        const utf8 = new TextEncoder().encode(input.value);
+        let binary = '';
+        utf8.forEach(byte => { binary += String.fromCharCode(byte); });
+        output.textContent = btoa(binary);
+      } catch(e) {
+        showError('b64-error', '编码失败：' + e.message);
+      }
+    }
+    function decodeB64() {
+      hideError('b64-error');
+      try {
+        const binary = atob(input.value);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        output.textContent = new TextDecoder().decode(bytes);
+      } catch(e) {
+        showError('b64-error', '解码失败：输入不是有效的 Base64 编码');
+      }
+    }
+    function clearB64() { input.value = ''; output.textContent = '等待输入...'; hideError('b64-error'); }
+    function copyB64() { copyText(this, output.textContent); }
+  </script>
+</body>
+</html>

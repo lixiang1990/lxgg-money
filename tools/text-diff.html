@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文本对比 - 工具盒 ToolKitHub</title>
+  <meta name="description" content="在线文本对比工具，对比两段文本差异，高亮显示增删改，支持逐行比较。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .diff-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .diff-side { display: flex; flex-direction: column; }
+    .diff-side label { font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+    .diff-side textarea { min-height: 200px; }
+    .diff-result-wrap { margin-top: 16px; }
+    .diff-result { font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 13px; line-height: 1.6; }
+    .diff-add { background: #dcfce7; color: #166534; padding: 2px 4px; border-radius: 2px; }
+    .diff-remove { background: #fee2e2; color: #991b1b; padding: 2px 4px; border-radius: 2px; text-decoration: line-through; }
+    .diff-same { color: #475569; }
+    @media (max-width: 640px) { .diff-container { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container"><a href="../" class="logo">🧰 工具盒 <span class="logo-sub">ToolKitHub</span></a></div>
+  </header>
+  <main class="container tool-page">
+    <a href="../" class="back-link">← 返回首页</a>
+    <div class="tool-box">
+      <h1>📝 文本对比</h1>
+      <p class="tool-desc">对比两段文本差异，高亮显示增删改</p>
+      <div class="tool-area">
+        <div class="diff-container">
+          <div class="diff-side">
+            <label for="diff-left">原文</label>
+            <textarea id="diff-left" class="tool-input" placeholder="输入原文..."></textarea>
+          </div>
+          <div class="diff-side">
+            <label for="diff-right">改后</label>
+            <textarea id="diff-right" class="tool-input" placeholder="输入修改后的文本..."></textarea>
+          </div>
+        </div>
+        <div class="tool-actions">
+          <button onclick="compareDiff()" class="btn btn-primary">🔄 对比</button>
+          <button onclick="clearDiff()" class="btn btn-secondary">🗑️ 清空</button>
+        </div>
+        <div class="error-msg" id="diff-error"></div>
+        <div class="diff-result-wrap">
+          <label class="tool-label">差异结果</label>
+          <div class="tool-output diff-result" id="diff-output">点击"对比"查看差异</div>
+          <button class="copy-btn" onclick="copyDiff()">📋 复制</button>
+        </div>
+      </div>
+    </div>
+    <div class="ad-placeholder">
+      <p class="ad-label">—— 推广 ——</p>
+      <div class="ad-content">推荐工具：<a href="https://www.baidu.com/s?wd=%E5%9C%A8%E7%BA%BF%E6%96%87%E6%9C%AC%E5%AF%B9%E6%AF%94%E5%B7%A5%E5%85%B7" target="_blank">在线文本对比工具</a></div>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="container"><p>🧰 工具盒 ToolKitHub · 免费在线工具集</p></div></footer>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    const leftIn = document.getElementById('diff-left');
+    const rightIn = document.getElementById('diff-right');
+    const diffOut = document.getElementById('diff-output');
+
+    function compareDiff() {
+      hideError('diff-error');
+      const leftLines = leftIn.value.split('\n');
+      const rightLines = rightIn.value.split('\n');
+      const maxLen = Math.max(leftLines.length, rightLines.length);
+      let html = '<table style="width:100%;border-collapse:collapse;">';
+      for (let i = 0; i < maxLen; i++) {
+        const l = leftLines[i] || '';
+        const r = rightLines[i] || '';
+        if (l === r) {
+          html += `<tr><td style="width:50%;padding:2px 8px;color:#475569">${escapeHtml(l) || '&nbsp;'}</td><td style="width:50%;padding:2px 8px;color:#475569">${escapeHtml(r) || '&nbsp;'}</td></tr>`;
+        } else {
+          html += `<tr><td style="width:50%;padding:2px 8px;background:#fee2e2;color:#991b1b">${escapeHtml(l) || '&nbsp;'}</td><td style="width:50%;padding:2px 8px;background:#dcfce7;color:#166534">${escapeHtml(r) || '&nbsp;'}</td></tr>`;
+        }
+      }
+      html += '</table>';
+      diffOut.innerHTML = html || '<span style="color:#94a3b8">两侧文本相同</span>';
+    }
+    function clearDiff() { leftIn.value = ''; rightIn.value = ''; diffOut.innerHTML = '点击"对比"查看差异'; hideError('diff-error'); }
+    function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+    function copyDiff() { copyText(this, diffOut.textContent.replace(/\s+/g, ' ')); }
+  </script>
+</body>
+</html>

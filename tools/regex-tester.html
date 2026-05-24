@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正则测试器 - 工具盒 ToolKitHub</title>
+  <meta name="description" content="在线正则表达式测试工具，实时匹配高亮，支持多种标志符，测试提取替换。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .regex-flags { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; }
+    .regex-flags label { display: flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer; }
+    .regex-flags input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+    .match-result { font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; }
+    .match-highlight { background: #fde68a; border-radius: 2px; padding: 1px 0; }
+    .match-count { font-size: 13px; color: #64748b; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container"><a href="../" class="logo">🧰 工具盒 <span class="logo-sub">ToolKitHub</span></a></div>
+  </header>
+  <main class="container tool-page">
+    <a href="../" class="back-link">← 返回首页</a>
+    <div class="tool-box">
+      <h1>🔍 正则测试器</h1>
+      <p class="tool-desc">在线测试正则表达式，实时匹配高亮，支持多种标志位</p>
+      <div class="tool-area">
+        <div>
+          <label class="tool-label" for="regex-pattern">正则表达式</label>
+          <input id="regex-pattern" class="tool-input" type="text" placeholder="例如：\d{4}-\d{2}-\d{2}" style="font-size:14px;padding:10px 14px;min-height:auto;font-family:monospace">
+        </div>
+        <div class="regex-flags">
+          <label><input type="checkbox" id="flag-g" checked onchange="testRegex()"> g (全局)</label>
+          <label><input type="checkbox" id="flag-i" onchange="testRegex()"> i (忽略大小写)</label>
+          <label><input type="checkbox" id="flag-m" onchange="testRegex()"> m (多行)</label>
+          <label><input type="checkbox" id="flag-s" onchange="testRegex()"> s (点匹配换行)</label>
+        </div>
+        <div>
+          <label class="tool-label" for="regex-text">测试文本</label>
+          <textarea id="regex-text" class="tool-input" placeholder="输入要匹配的文本..." oninput="testRegex()">2024-01-15 和 2025-06-30 是两个日期，联系邮箱：user@example.com</textarea>
+        </div>
+        <div class="error-msg" id="regex-error"></div>
+        <div>
+          <label class="tool-label">匹配结果</label>
+          <div class="tool-output match-result" id="regex-output">等待输入...</div>
+          <div class="match-count" id="regex-count"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ad-placeholder">
+      <p class="ad-label">—— 推广 ——</p>
+      <div class="ad-content">推荐资源：<a href="https://www.baidu.com/s?wd=%E5%9C%A8%E7%BA%BF%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B5%8B%E8%AF%95" target="_blank">正则表达式教程</a></div>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="container"><p>🧰 工具盒 ToolKitHub · 免费在线工具集</p></div></footer>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    const pattern = document.getElementById('regex-pattern');
+    const text = document.getElementById('regex-text');
+    const output = document.getElementById('regex-output');
+    const count = document.getElementById('regex-count');
+    const flagG = document.getElementById('flag-g');
+    const flagI = document.getElementById('flag-i');
+    const flagM = document.getElementById('flag-m');
+    const flagS = document.getElementById('flag-s');
+
+    function testRegex() {
+      hideError('regex-error');
+      const pat = pattern.value;
+      if (!pat) { output.innerHTML = '请输入正则表达式'; count.textContent = ''; return; }
+      const txt = text.value;
+      if (!txt) { output.innerHTML = '请输入测试文本'; count.textContent = ''; return; }
+
+      try {
+        let flags = 'g';
+        if (flagI.checked) flags += 'i';
+        if (flagM.checked) flags += 'm';
+        if (flagS.checked) flags += 's';
+        if (!flagG.checked) flags = flags.replace('g', '');
+
+        const re = new RegExp(pat, flags);
+        const matches = [...txt.matchAll(re)];
+        
+        if (matches.length === 0) {
+          output.innerHTML = '<span style="color:#94a3b8">无匹配结果</span>';
+          count.textContent = '匹配 0 处';
+          return;
+        }
+
+        // 高亮显示
+        let html = '';
+        let lastIdx = 0;
+        // 用全局正则高亮
+        const hlRe = new RegExp(pat, 'g' + (flagI.checked ? 'i' : '') + (flagM.checked ? 'm' : '') + (flagS.checked ? 's' : ''));
+        const parts = txt.split(hlRe);
+        const hlMatches = txt.match(hlRe) || [];
+        
+        if (hlMatches.length === 0) {
+          html = escapeHtml(txt);
+        } else {
+          let pi = 0;
+          for (const m of hlMatches) {
+            const idx = txt.indexOf(m, pi);
+            if (idx > pi) html += escapeHtml(txt.slice(pi, idx));
+            html += `<span class="match-highlight">${escapeHtml(m)}</span>`;
+            pi = idx + m.length;
+          }
+          if (pi < txt.length) html += escapeHtml(txt.slice(pi));
+        }
+        
+        output.innerHTML = html || '<span style="color:#94a3b8">无匹配结果</span>';
+        
+        // 显示详细信息
+        if (matches.length > 0 && matches[0].length > 1) {
+          let detail = '';
+          matches.forEach((m, i) => {
+            detail += `\n匹配 ${i+1}: "${m[0]}"`;
+            for (let g = 1; g < m.length; g++) {
+              if (m[g] !== undefined) detail += `  组${g}: "${m[g]}"`;
+            }
+          });
+          count.textContent = `匹配 ${matches.length} 处${detail}`;
+        } else {
+          count.textContent = `匹配 ${matches.length} 处`;
+        }
+      } catch(e) {
+        showError('regex-error', '正则语法错误：' + e.message);
+        output.innerHTML = '';
+        count.textContent = '';
+      }
+    }
+
+    function escapeHtml(text) {
+      const d = document.createElement('div');
+      d.textContent = text;
+      return d.innerHTML;
+    }
+
+    // 实时触发
+    pattern.addEventListener('input', testRegex);
+    flagI.addEventListener('change', testRegex);
+    flagM.addEventListener('change', testRegex);
+    flagS.addEventListener('change', testRegex);
+    flagG.addEventListener('change', testRegex);
+    // 初始测试
+    setTimeout(testRegex, 100);
+  </script>
+</body>
+</html>
